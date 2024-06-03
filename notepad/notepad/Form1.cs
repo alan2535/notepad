@@ -147,63 +147,64 @@ namespace notepad
 
         private void rtbText_TextChanged(object sender, EventArgs e)
         {
-            if (isUndoRedo) return;
-
-            textHistory.Push(rtbText.Text);
-            redoHistory.Clear();
-
-            if (textHistory.Count > MaxHistoryCount)
+            if (isUndoRedo == false)
             {
-                Stack<string> tempStack = new Stack<string>();
-                for (int i = 0; i < MaxHistoryCount; i++)
-                {
-                    tempStack.Push(textHistory.Pop());
-                }
-                textHistory.Clear();
-                foreach (string item in tempStack)
-                {
-                    textHistory.Push(item);
-                }
-            }
+                SaveCurrentStateToStack();
+                redoStack.Clear();
 
-            UpdateListBox();
+                if (undoStack.Count > MaxHistoryCount)
+                {
+                    Stack<MemoryStream> tempStack = new Stack<MemoryStream>();
+                    for (int i = 0; i < MaxHistoryCount; i++)
+                    {
+                        tempStack.Push(undoStack.Pop());
+                    }
+                    undoStack.Clear();
+                    foreach (MemoryStream item in tempStack)
+                    {
+                        undoStack.Push(item);
+                    }
+                }
+                UpdateListBox();
+            }
         }
 
         private void btnUndo_Click(object sender, EventArgs e)
         {
-            isUndoRedo = true;
-            if (textHistory.Count > 1)
+            if (undoStack.Count > 1)
             {
-                redoHistory.Push(textHistory.Pop());
-                rtbText.Text = textHistory.Peek();
+                isUndoRedo = true;
+                redoStack.Push(undoStack.Pop());
+                MemoryStream lastSavedState = undoStack.Peek();
+                LoadFromMemory(lastSavedState);
+                UpdateListBox();
+                isUndoRedo = false;
             }
-            UpdateListBox();
-
-            isUndoRedo = false;
         }
 
         private void btnRedo_Click(object sender, EventArgs e)
         {
-            isUndoRedo = true;
-            if (redoHistory.Count > 0)
+            if (redoStack.Count > 0)
             {
-                textHistory.Push(redoHistory.Pop());
-                rtbText.Text = textHistory.Peek();
+                isUndoRedo = true;
+                undoStack.Push(redoStack.Pop());
+                MemoryStream lastSavedState = undoStack.Peek();
+                LoadFromMemory(lastSavedState);
+                UpdateListBox();
+                isUndoRedo = false;
             }
-            UpdateListBox();
-
-            isUndoRedo = false;
         }
 
         void UpdateListBox()
         {
             listUndo.Items.Clear();
 
-            foreach (string item in textHistory)
+            foreach (MemoryStream item in undoStack)
             {
                 listUndo.Items.Add(item);
             }
         }
+
 
         private void listUndo_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -246,6 +247,20 @@ namespace notepad
                 rtbText.Font = new Font(rtbText.Font, style);
             }
         }
+        private Stack<MemoryStream> undoStack = new Stack<MemoryStream>();
+        private Stack<MemoryStream> redoStack = new Stack<MemoryStream>(); 
+        private void SaveCurrentStateToStack()
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            rtbText.SaveFile(memoryStream, RichTextBoxStreamType.RichText);
 
+            undoStack.Push(memoryStream);
+        }
+        private void LoadFromMemory(MemoryStream memoryStream)
+        {
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            rtbText.LoadFile(memoryStream, RichTextBoxStreamType.RichText);
+        }
     }
+
 }
