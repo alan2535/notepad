@@ -55,23 +55,31 @@ namespace notepad
         private void btnSave_Click(object sender, EventArgs e)
         {
             saveFileDialog1.Title = "儲存檔案";
-            saveFileDialog1.Filter = "文字檔案 (*.txt)|*.txt|所有檔案 (*.*)|*.*";
+            saveFileDialog1.Filter = "RTF格式檔案 (*.rtf)|*.rtf|文字檔案 (*.txt)|*.txt|所有檔案 (*.*)|*.*";
             saveFileDialog1.FilterIndex = 1;
             saveFileDialog1.InitialDirectory = "C:\\";
 
             DialogResult result = saveFileDialog1.ShowDialog();
+
+            FileStream fileStream = null;
 
             if (result == DialogResult.OK)
             {
                 try
                 {
                     string saveFileName = saveFileDialog1.FileName;
+                    string extension = Path.GetExtension(saveFileName);
 
-                    using (FileStream fileStream = new FileStream(saveFileName, FileMode.Create, FileAccess.Write))
+                    using (fileStream = new FileStream(saveFileName, FileMode.Create, FileAccess.Write))
                     {
-                        using (StreamWriter streamWriter = new StreamWriter(fileStream, Encoding.UTF8))
+                        if (extension.ToLower() == ".txt")
                         {
-                            streamWriter.Write(rtbText.Text);
+                            byte[] data = Encoding.UTF8.GetBytes(rtbText.Text);
+                            fileStream.Write(data, 0, data.Length);
+                        }
+                        else if (extension.ToLower() == ".rtf")
+                        {
+                            rtbText.SaveFile(fileStream, RichTextBoxStreamType.RichText);
                         }
                     }
 
@@ -81,17 +89,21 @@ namespace notepad
                 {
                     MessageBox.Show("儲存檔案時發生錯誤: " + ex.Message, "錯誤訊息", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+                finally
+                {
+                    fileStream.Close();
+                }
             }
             else
             {
-                MessageBox.Show("使用者取消了儲存檔案操作。", "訊息", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("使用者取消了儲存檔案操作。", "訊息", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
             }
         }
 
         private void btnOpen_Click(object sender, EventArgs e)
         {
             openFileDialog1.Title = "選擇檔案";
-            openFileDialog1.Filter = "文字檔案 (*.txt)|*.txt|所有檔案 (*.*)|*.*";
+            openFileDialog1.Filter = "RTF格式檔案 (*.rtf)|*.rtf|文字檔案 (*.txt)|*.txt|所有檔案 (*.*)|*.*";
             openFileDialog1.FilterIndex = 1;
             openFileDialog1.InitialDirectory = "C:\\";
             openFileDialog1.Multiselect = true;
@@ -104,13 +116,23 @@ namespace notepad
                 {
                     string selectedFileName = openFileDialog1.FileName;
 
-                    using (FileStream fileStream = new FileStream(selectedFileName, FileMode.Open, FileAccess.Read))
+                    string fileExtension = Path.GetExtension(selectedFileName).ToLower();
+
+                    if (fileExtension == ".txt")
                     {
-                        using (StreamReader streamReader = new StreamReader(fileStream, Encoding.UTF8))
+                        using (FileStream fileStream = new FileStream(selectedFileName, FileMode.Open, FileAccess.Read))
                         {
-                            rtbText.Text = streamReader.ReadToEnd();
+                            using (StreamReader streamReader = new StreamReader(fileStream, Encoding.UTF8))
+                            {
+                                rtbText.Text = streamReader.ReadToEnd();
+                            }
                         }
                     }
+                    else if (fileExtension == ".rtf")
+                    {
+                        rtbText.LoadFile(selectedFileName, RichTextBoxStreamType.RichText);
+                    }
+
                 }
                 catch (Exception ex)
                 {
