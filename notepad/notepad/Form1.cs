@@ -9,8 +9,9 @@ namespace notepad
     public partial class Form1 : Form
     {
         private Stack<string> textHistory = new Stack<string>();
+        private Stack<string> redoHistory = new Stack<string>();
         private const int MaxHistoryCount = 10;
-        private bool isUndo = false;
+        private bool isUndoRedo = false;
 
         public Form1()
         {
@@ -94,9 +95,10 @@ namespace notepad
 
         private void rtbText_TextChanged(object sender, EventArgs e)
         {
-            if (isUndo) return;
+            if (isUndoRedo) return;
 
             textHistory.Push(rtbText.Text);
+            redoHistory.Clear();
 
             if (textHistory.Count > MaxHistoryCount)
             {
@@ -117,15 +119,28 @@ namespace notepad
 
         private void btnUndo_Click(object sender, EventArgs e)
         {
-            isUndo = true;
+            isUndoRedo = true;
             if (textHistory.Count > 1)
             {
-                textHistory.Pop();
+                redoHistory.Push(textHistory.Pop());
                 rtbText.Text = textHistory.Peek();
             }
             UpdateListBox();
 
-            isUndo = false;
+            isUndoRedo = false;
+        }
+
+        private void btnRedo_Click(object sender, EventArgs e)
+        {
+            isUndoRedo = true;
+            if (redoHistory.Count > 0)
+            {
+                textHistory.Push(redoHistory.Pop());
+                rtbText.Text = textHistory.Peek();
+            }
+            UpdateListBox();
+
+            isUndoRedo = false;
         }
 
         void UpdateListBox()
