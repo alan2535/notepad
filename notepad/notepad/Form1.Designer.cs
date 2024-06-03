@@ -33,6 +33,8 @@
             this.rtbText = new System.Windows.Forms.RichTextBox();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.listUndo = new System.Windows.Forms.ListBox();
+            this.btnUndo = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnOpen
@@ -59,7 +61,7 @@
             // 
             this.rtbText.Location = new System.Drawing.Point(12, 83);
             this.rtbText.Name = "rtbText";
-            this.rtbText.Size = new System.Drawing.Size(753, 327);
+            this.rtbText.Size = new System.Drawing.Size(495, 327);
             this.rtbText.TabIndex = 1;
             this.rtbText.Text = "";
             this.rtbText.TextChanged += new System.EventHandler(this.rtbText_TextChanged);
@@ -68,11 +70,33 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // listUndo
+            // 
+            this.listUndo.FormattingEnabled = true;
+            this.listUndo.ItemHeight = 15;
+            this.listUndo.Location = new System.Drawing.Point(550, 91);
+            this.listUndo.Name = "listUndo";
+            this.listUndo.Size = new System.Drawing.Size(216, 319);
+            this.listUndo.TabIndex = 3;
+            this.listUndo.SelectedIndexChanged += new System.EventHandler(this.listUndo_SelectedIndexChanged);
+            // 
+            // btnUndo
+            // 
+            this.btnUndo.Location = new System.Drawing.Point(322, 28);
+            this.btnUndo.Name = "btnUndo";
+            this.btnUndo.Size = new System.Drawing.Size(97, 23);
+            this.btnUndo.TabIndex = 4;
+            this.btnUndo.Text = "復原上一步";
+            this.btnUndo.UseVisualStyleBackColor = true;
+            this.btnUndo.Click += new System.EventHandler(this.btnUndo_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.btnUndo);
+            this.Controls.Add(this.listUndo);
             this.Controls.Add(this.rtbText);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnOpen);
@@ -90,6 +114,8 @@
         private System.Windows.Forms.RichTextBox rtbText;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.ListBox listUndo;
+        private System.Windows.Forms.Button btnUndo;
     }
 }
 
