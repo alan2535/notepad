@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
@@ -16,8 +17,37 @@ namespace notepad
         public Form1()
         {
             InitializeComponent();
+            InitializeFontComboBox();
+            InitializeFontSizeComboBox();
+            InitializeFontStyleComboBox();
+        }
+        private void InitializeFontComboBox()
+        {
+            foreach (FontFamily font in FontFamily.Families)
+            {
+                comboBoxFont.Items.Add(font.Name);
+            }
+            comboBoxFont.SelectedIndex = 0;
         }
 
+        private void InitializeFontSizeComboBox()
+        {
+            for (int i = 8; i <= 72; i += 2)
+            {
+                comboBoxSize.Items.Add(i);
+            }
+            comboBoxSize.SelectedIndex = 2;
+        }
+
+        private void InitializeFontStyleComboBox()
+        {
+            comboBoxStyle.Items.Add(FontStyle.Regular.ToString());
+            comboBoxStyle.Items.Add(FontStyle.Bold.ToString());
+            comboBoxStyle.Items.Add(FontStyle.Italic.ToString());
+            comboBoxStyle.Items.Add(FontStyle.Underline.ToString());
+            comboBoxStyle.Items.Add(FontStyle.Strikeout.ToString());
+            comboBoxStyle.SelectedIndex = 0;
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
         }
@@ -156,5 +186,44 @@ namespace notepad
         private void listUndo_SelectedIndexChanged(object sender, EventArgs e)
         {
         }
+
+        private void comboBoxFont_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (rtbText.SelectionLength > 0)
+            {
+                rtbText.SelectionFont = new Font(comboBoxFont.SelectedItem.ToString(), rtbText.SelectionFont.Size, rtbText.SelectionFont.Style);
+            }
+            else
+            {
+                rtbText.Font = new Font(comboBoxFont.SelectedItem.ToString(), rtbText.Font.Size, rtbText.Font.Style);
+            }
+        }
+
+        private void comboBoxSize_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (rtbText.SelectionLength > 0)
+            {
+                rtbText.SelectionFont = new Font(rtbText.SelectionFont.FontFamily, Convert.ToInt32(comboBoxSize.SelectedItem), rtbText.SelectionFont.Style);
+            }
+            else
+            {
+                rtbText.Font = new Font(rtbText.Font.FontFamily, Convert.ToInt32(comboBoxSize.SelectedItem), rtbText.Font.Style);
+            }
+        }
+
+        private void comboBoxStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (rtbText.SelectionLength > 0)
+            {
+                FontStyle style = (FontStyle)Enum.Parse(typeof(FontStyle), comboBoxStyle.SelectedItem.ToString());
+                rtbText.SelectionFont = new Font(rtbText.SelectionFont, style);
+            }
+            else
+            {
+                FontStyle style = (FontStyle)Enum.Parse(typeof(FontStyle), comboBoxStyle.SelectedItem.ToString());
+                rtbText.Font = new Font(rtbText.Font, style);
+            }
+        }
+
     }
 }
